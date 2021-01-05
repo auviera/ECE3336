@@ -5,8 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.LruCache;
 import android.view.View;
@@ -62,35 +65,67 @@ public class MainActivity extends AppCompatActivity {
         MyAdapter myAdapter = new MyAdapter();
 //        myAdapter.addElements(versions);
         recyclerView.setAdapter(myAdapter);
+
+        Cursor cursor = getContentResolver().query(
+                Uri.parse("content://com.example.tutorial1.provider"),
+                new String[]{"name","description","icon"}, null, null, "name");
         queue = Volley.newRequestQueue(this);
-        JsonArrayRequest request =
-                new JsonArrayRequest(Request.Method.GET, " https://raw.githubusercontent.com/kenobicjj/android/main/tutorial4.json ", null,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        versions.clear();
-                        for(int i = 0;i < response.length();i++) {
-                            try {
-                                JSONObject item = response.getJSONObject(i);
-                                String name = item.getString("name");
-                                String description = item.getString("description");
-                                String icon = item.getString("icon");
-                                Version version =new Version(name, description, icon);
-                                versions.add(version);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+        if(cursor.getCount() == 0) {
+            JsonArrayRequest request =
+                    new JsonArrayRequest(Request.Method.GET, " https://raw.githubusercontent.com/kenobicjj/android/main/tutorial4.json ", null,
+                            new Response.Listener<JSONArray>() {
+                                @Override
+                                public void onResponse(JSONArray response) {
+                                    versions.clear();
+                                    for(int i = 0;i < response.length();i++) {
+                                        try {
+                                            JSONObject item = response.getJSONObject(i);
+                                            String name = item.getString("name");
+                                            String description = item.getString("description");
+                                            String icon = item.getString("icon");
+                                            Version version =new Version(name, description, icon);
+                                            versions.add(version);
+                                            ContentValues values = new ContentValues(3);
+                                            values.put("name", name);
+                                            values.put("description", description);
+                                            values.put("icon", icon);
+                                            getContentResolver().insert(Uri.parse("content://com.example.tutorial1.provider"), values);
+                                            Toast.makeText(MainActivity.this, "load from repo", Toast.LENGTH_SHORT).show();
+
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    myAdapter.addElements(versions);
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                }
                             }
-                        }
-                        myAdapter.addElements(versions);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                    }
-                }
-                );
-        queue.add(request);
+                    );
+            queue.add(request);
+
+        } else {
+            cursor.moveToFirst();
+            while(!cursor.isAfterLast()) {
+
+                String name = cursor.getString(0);
+                String description = cursor.getString(1);
+                String icon = cursor.getString(2);
+                Version version = new Version(name, description, icon);
+                versions.add(version);
+                cursor.moveToNext();
+
+            }
+            cursor.close();
+            Toast.makeText(this, "load from database", Toast.LENGTH_SHORT).show();
+            myAdapter.addElements(versions);
+        }
+
+
+
 
     }
     class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
@@ -109,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
             holder.textView2.setText(elements.get(position).getDescription());
 //            holder.imageView.setImageResource(elements.get(position).getIcon());
             String iconUrl = "https://raw.githubusercontent.com/kenobicjj/android/main/"+elements.get(position).getIcon();
-            Toast.makeText(MainActivity.this,iconUrl,Toast.LENGTH_SHORT).show();
             final LruCache<String, Bitmap> cache =new LruCache<String, Bitmap>(20);
             holder.imageView.setImageUrl(iconUrl, new ImageLoader(queue, new ImageLoader.ImageCache() {
                         @Override
