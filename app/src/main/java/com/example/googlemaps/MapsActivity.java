@@ -42,8 +42,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng mmu = new LatLng(2.926386, 101.641144);
-        mMap.addMarker(new MarkerOptions().position(mmu).title("ECE3336").snippet("Mobile Application Development"));
+        LatLng mmu = new LatLng(-7.309701 , 112.759611);
+        mMap.addMarker(new MarkerOptions().position(mmu).title("Highschool").snippet("State Senior High School 16 Surabaya"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mmu, 17));
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
