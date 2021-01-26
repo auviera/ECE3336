@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     }
 
     private void storePhotoToStorage(Bitmap cbmp, String pathFileName) {
-        String path="data/data/mmu.edu.my.tutorial9/"+pathFileName+".jpg";
+        String path="data/data/com.example.photocapture/"+pathFileName+".jpg";
         File outputFile=new File(path);
         Toast.makeText(this, "Photo stored in:"+path, Toast.LENGTH_SHORT).show();
         try {
