@@ -1,0 +1,11 @@
+<resources>
+    <string name="com.example.persistent.preferenceString">preferenceString</string>
+    <string name="app_name">persistent</string>
+    <string name="savePref">savePref</string>
+    <string name="loadPref">loadPref</string>
+    <string name="saveFile">saveFile</string>
+    <string name="loadFile">loadFile</string>
+    <string name="inputString">input value here</string>
+    <string name="outputString">output value here</string>
+
+</resources>
